@@ -10,34 +10,68 @@ server.get('/', (req, res) => {
 });
 
 server.get('/api/users', (req, res) => {
-    const users = [
-        {
-        id: 1,
-        name: "Jane Doe", // String, required
-        bio: "Not Tarzan's Wife, another Jane",  // String
-        // created_at: Mon Oct 28 12:50:16 GMT-0700 (PDT), // Date, defaults to current date
-        // updated_at: Mon Oct 28 12:50:16 GMT-0700 (PDT) // Date, defaults to current date
-        }
-    ];
+    db.find(id)
+      .then(users => {
+        res.status(200).json(users);
+      })
+      .catch(err => {
+        console.log('error', err);
+        res.status(500).json({ error: 'failed to get users from db' });
+      });
+  });
 
-    res.status(200).send(users);
-})
+server.get('/api/users/:id', (req, res) => {
+    db.findById()
+        .then(users => {
+        res.status(200).json(users);
+        })
+        .catch(err => {
+        console.log('error', err);
+        res.status(500).json({ error: 'failed to get users from db' });
+        });
+});
 
 server.post('/api/users', (req, res) => {
-    const usersInfo = req.body;
-    
-    console.log('users info: ', usersInfo);
-    db.add(usersInfo)
-    .then(users => {
-        res.status(201).json(users);
-    })
-    .catch(err => {
+    const user = req.body;
+
+    console.log('user', user);
+
+    db.insert(user)
+        .then(user => {
+        res.status(201).json(user);
+        })
+        .catch(err => {
         console.log('error', err);
-        res.status(400).json({ errorMessage: "Please provide name and bio for the user." })
-        
-    })
+        res.status(500).json({ error: 'failed to add the user to the db' });
+        });
 });
 
-server.listen(8000, () => {
-    console.log('API is running on port 8000');
+server.put('/api/users/:id', (req, res) => {
+    const user = req.body;
+
+    console.log('user', user);
+
+    db.update(user, id)
+        .then(user => {
+        res.status(201).json(user);
+        })
+        .catch(err => {
+        console.log('error', err);
+        res.status(500).json({ error: 'failed to add the user to the db' });
+        });
 });
+
+  server.delete('/api/users/:id', (req, res) => {
+    const id = req.params.id;
+  
+    db.remove(id)
+      .then(id => {
+        res.status(200).json({ message: `users with id ${id} deleted` });
+      })
+      .catch(err => {
+        console.log('error', err);
+        res.status(500).json({ error: 'failed to delete the user from the db' });
+      });
+  });
+
+server.listen(8000, () => console.log('\n=== API on port 8000 ===\n'));
