@@ -22,14 +22,22 @@ server.get('/api/users', (req, res) => {
 
 server.get('/api/users/:id', (req, res) => {
     const id = req.params.id;
-    db.findById(id)
-        .then(user => {
-        res.status(200).json(user);
-        })
-        .catch(err => {
-        console.log('error', err);
-        res.status(500).json({ error: 'failed to get user from db' });
-        });
+    
+      db.findById(id)
+          .then(users => {
+            if (users) {
+              res.status(200)
+              .json(users);
+            } else {
+              res.status(500)
+              .json({ error: "The user information could not be retrieved." });
+            }
+          })
+          .catch(err => {
+          console.log('error', err);
+          res.status(404)
+          .json(`{ message: "The user with the specified ID of ${id} does not exist." }`);
+          })
 });
 
 
@@ -47,7 +55,7 @@ server.post("/api/users", (req, res) => {
             .json({ errorMessage: "Please provide name and bio for user." });
         })
     :
-      res.status(500).json({ error: "failed to add the user to the db" });
+    res.status(500).json({ error: "failed to add the user to the db" });
 });
 
 server.put('/api/users/:id', (req, res) => {
@@ -57,11 +65,14 @@ server.put('/api/users/:id', (req, res) => {
 
     db.update(id, user)
         .then(updatedUser => {
-        res.status(201).json(user);
-        })
+          if (updatedUser) {
+            res.status(200).json(updateUser);
+          } else {
+            res.status(400).json({ message: "The user with the specified ID does not exist." })
+        }})
         .catch(err => {
         console.log('error', err);
-        res.status(500).json({ error: 'failed to add the user to the db' });
+        res.status(500).json({ error: "The user information could not be modified." });
         });
 });
 
