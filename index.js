@@ -16,7 +16,7 @@ server.get('/api/users', (req, res) => {
       })
       .catch(err => {
         console.log('error', err);
-        res.status(500).json({ error: 'failed to get users from db' });
+        res.status(500).json({ error: "The users information could not be retrieved." });
       });
   });
 
@@ -32,19 +32,22 @@ server.get('/api/users/:id', (req, res) => {
         });
 });
 
-server.post('/api/users', (req, res) => {
-    const user = req.body;
 
-    console.log('user', user);
-
-    db.insert(user)
-        .then(user => {
-        res.status(201).json(user);
+server.post("/api/users", (req, res) => {
+  const userInformation = req.body;
+  (req.params.name && req.params.bio) ?
+    db.insert(userInformation)
+      .then(id => {
+        
+          res.status(201).json(id);
         })
-        .catch(err => {
-        console.log('error', err);
-        res.status(500).json({ error: 'failed to add the user to the db' }).end();
-        });
+      .catch(err => {
+          res
+            .status(400)
+            .json({ errorMessage: "Please provide name and bio for user." });
+        })
+    :
+      res.status(500).json({ error: "failed to add the user to the db" });
 });
 
 server.put('/api/users/:id', (req, res) => {
@@ -66,12 +69,16 @@ server.delete('/api/users/:id', (req, res) => {
     const id = req.params.id;
   
     db.remove(id)
-      .then(deadId => {
-        res.status(200).json({ message: `users with id ${id} deleted` });
+      .then(res => {
+        if (id) {
+          res.status(200).json({ message: `users with id ${id} deleted` });
+        } else {
+          res.status(404).json({ message: "The user with the specified ID does not exist." })
+        }
       })
       .catch(err => {
         console.log('error', err);
-        res.status(500).json({ error: 'failed to delete the user from the db' });
+        res.status(500).json({ error: "The user could not be removed" });
       });
 });
 
