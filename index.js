@@ -10,7 +10,7 @@ server.get('/', (req, res) => {
 });
 
 server.get('/api/users', (req, res) => {
-    db.find(id)
+    db.find()
       .then(users => {
         res.status(200).json(users);
       })
@@ -21,13 +21,14 @@ server.get('/api/users', (req, res) => {
   });
 
 server.get('/api/users/:id', (req, res) => {
-    db.findById()
-        .then(users => {
-        res.status(200).json(users);
+    const id = req.params.id;
+    db.findById(id)
+        .then(user => {
+        res.status(200).json(user);
         })
         .catch(err => {
         console.log('error', err);
-        res.status(500).json({ error: 'failed to get users from db' });
+        res.status(500).json({ error: 'failed to get user from db' });
         });
 });
 
@@ -42,17 +43,17 @@ server.post('/api/users', (req, res) => {
         })
         .catch(err => {
         console.log('error', err);
-        res.status(500).json({ error: 'failed to add the user to the db' });
+        res.status(500).json({ error: 'failed to add the user to the db' }).end();
         });
 });
 
 server.put('/api/users/:id', (req, res) => {
+    const id = req.params.id;
     const user = req.body;
-
     console.log('user', user);
 
-    db.update(user, id)
-        .then(user => {
+    db.update(id, user)
+        .then(updatedUser => {
         res.status(201).json(user);
         })
         .catch(err => {
@@ -61,17 +62,17 @@ server.put('/api/users/:id', (req, res) => {
         });
 });
 
-  server.delete('/api/users/:id', (req, res) => {
+server.delete('/api/users/:id', (req, res) => {
     const id = req.params.id;
   
     db.remove(id)
-      .then(id => {
+      .then(deadId => {
         res.status(200).json({ message: `users with id ${id} deleted` });
       })
       .catch(err => {
         console.log('error', err);
         res.status(500).json({ error: 'failed to delete the user from the db' });
       });
-  });
+});
 
 server.listen(8000, () => console.log('\n=== API on port 8000 ===\n'));
